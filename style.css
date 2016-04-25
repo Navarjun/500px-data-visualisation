@@ -1,0 +1,44 @@
+body {
+  padding: 0px;
+  margin: 0px;
+  font-family: Helvetica;
+}
+
+.container {
+  padding: 0px;
+}
+
+.projectTitle {
+  font-weight: 900;
+  fill: rgb(183, 93, 93);
+}
+
+.axisX path {
+  fill: none;
+  stroke-width: 1px;
+  stroke: #AAA;
+}
+
+.axisX text {
+  fill: #AAA;
+}
+
+.axisLabel {
+  fill: #444;
+  font-size: 1em;
+  font-weight: 200;
+  cursor: pointer;
+}
+
+.tip {
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  left: 0;
+  z-index: 999;
+}
+
+.paramsG {
+  color: #444;
+  cursor: pointer;
+}
