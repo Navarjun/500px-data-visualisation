@@ -1,9 +1,10 @@
 "use strict";
 var canvas = d3.select("#canvas");
-canvas.attr("width", d3.select(canvas.node().parentElement).node().clientWidth)
+var canvasParentNode = d3.select(canvas.node().parentElement);
+canvas.attr("width", canvasParentNode.node().clientWidth - parseInt(canvasParentNode.style("padding-left"), 10) - parseInt(canvasParentNode.style("padding-right"), 10))
   .attr("height", innerHeight*2/3)
   .style("background", "rgb(250, 250, 250)");
-d3.select(".imageDetails")
+var imageDetails = d3.select(".imageDetails")
   .attr("style", "height: "+canvas.attr("height")+"px;");
 var config = {
   animationTime: 2000,
@@ -13,7 +14,7 @@ var config = {
   lineHeight: 10
 }
 
-config.chartFrame = {x: config.margin.l, y: config.margin.t, width: canvas.attr("height")-config.margin.l-config.margin.r, height: canvas.attr("height")-config.margin.t-config.margin.b};
+config.chartFrame = {x: config.margin.l, y: config.margin.t, width: canvas.attr("width")-config.margin.l-config.margin.r, height: canvas.attr("height")-config.margin.t-config.margin.b};
 
 var paramsArray = [
   {key:"focal_length", display:"Focal Length"},
@@ -65,7 +66,17 @@ function drawCharts() {
     chartG.append("g")
       .attr("transform", "translate("+config.chartFrame.x+","+config.chartFrame.height+")")
       .call(axis);
-    var nestingFunction = d3.nest().key(function(d) { return d.taken_at.getHours(); });
+    var nestingFunction = d3.nest()
+      .key(function(d) { return d.taken_at.getHours(); })
+      .sortValues(function(a, b) { return b.taken_at < a.taken_at ? -1 : b.taken_at > a.taken_at ? 1 : b.taken_at >= a.taken_at ? 0 : NaN; });
+
+    chartG.append("g")
+      .attr("transform", "translate("+(config.chartFrame.x+config.chartFrame.width/2)+","+config.chartFrame.height+")")
+      .append("text")
+      .html("Hour of yesterday(yesterday midnight to today midnight)")
+      .attr("transform", function() {
+        return "translate("+(-d3.select(this).node().getBBox().width/2)+", 30)"
+      })
 
     var plotData = nestingFunction.entries(masterData)
     chartG.append("g")
@@ -82,7 +93,48 @@ function drawCharts() {
       .attr("x", function(d) { return scaleX(d.taken_at.getHours())-5; })
       .attr("y", function(d, i) { return config.chartFrame.height - (i+1)*10; })
       .attr("height", "10px")
-      .attr("width", "10px");
+      .attr("width", "10px")
+      .on("click", function(d) {
+        // THIS IS TOTALLY A HACK TO MEET THE deadline of the submission
+        // SORRY
+        var string = "<div class='pixels-photo' style='width: 100%; padding-top: 20px;'>"+
+          "<p>"+
+            "<img src='"+d.images[1].https_url+"' alt='500px.com' style='width: 100%;'>"+
+          "</p>"+
+          "<a href='https://500px.com/photo/"+d.id+"' alt='500px.com'></a>"+
+        "</div>"+
+        "<table>"+
+          "<tr>"+
+            "<td>Camera: </td>"+
+            "<td>"+d.camera+"</td>"+
+          "</tr>"+
+          "<tr>"+
+            "<td>Lens: </td>"+
+            "<td>"+d.lens+"</td>"+
+          "</tr>"+
+          "<tr>"+
+            "<td>Focal Length: </td>"+
+            "<td>"+d.focal_length+"</td>"+
+          "</tr>"+
+          "<tr>"+
+            "<td>Aperture: </td>"+
+            "<td>"+d.aperture+"</td>"+
+          "</tr>"+
+          "<tr>"+
+            "<td>Shutterspeed: </td>"+
+            "<td>"+d.shutter_speed+"</td>"+
+          "</tr>"+
+          "<tr>"+
+            "<td>ISO: </td>"+
+            "<td>"+d.iso+"</td>"+
+          "</tr>"+
+          "<tr>"+
+            "<td>User: </td>"+
+            "<td><a style='color: #DDD;' href='//500px.com/"+d.user.username+"' target='_blank'/>"+d.user.username+"</td>"+
+          "</tr>"+
+        "</table>";
+        imageDetails.html(string)
+      });
 
       //<image xlink:href="firefox.jpg" x="0" y="0" height="50px" width="50px"/>
 }
