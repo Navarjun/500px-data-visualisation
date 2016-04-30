@@ -57,13 +57,13 @@ d3.json("./data/500px.json", function(error, json){
                   .data([])
                   .exit()
                   .remove();
-                  d3.select(".chartG")
-                    .transition()
-                    .duration(config.transitionAnimationTime)
-                    .style("opacity", 1)
-                    .each("end", function() {
-                      changeChart();
-                    })
+                d3.select(".chartG")
+                  .transition()
+                  .duration(config.transitionAnimationTime)
+                  .style("opacity", 1)
+                  .each("end", function() {
+                    changeChart();
+                  });
               })
               .transition()
               .delay(function(d, i) { return config.animationTimeDelay*i; })
@@ -84,12 +84,12 @@ d3.json("./data/500px.json", function(error, json){
       .domain([0, d3.max(data, function(d) { return +d[currentAxis]; })])
       .range([config.chartFrame.l, config.chartFrame.width+config.chartFrame.l]);
 
-    data = data.filter(function(d) {
-      if (isNaN(scaleX(+d[currentAxis]))) {
-        return false;
-      }
-      return true;
-    });
+    // data = data.filter(function(d) {
+    //   if (isNaN(scaleX(+d[currentAxis]))) {
+    //     return false;
+    //   }
+    //   return true;
+    // });
 
     var axisX = d3.svg.axis()
       .orient("bottom")
@@ -127,55 +127,3 @@ d3.json("./data/500px.json", function(error, json){
     alert("there was an error loading the data");
   }
 })
-
-function changeChart() {
-  var data = masterData.filter(function(d) {
-    if (!d[currentAxis]) {
-      return false;
-    }
-    return true;
-  });
-
-  var scaleX = d3.scale.linear()
-    .domain([0, d3.max(data, function(d) { return +d[currentAxis]; })])
-    .range([config.chartFrame.l, config.chartFrame.width+config.chartFrame.l]);
-
-  data = data.filter(function(d) {
-    if (isNaN(scaleX(+d[currentAxis]))) {
-      return false;
-    }
-    return true;
-  });
-
-  d3.select(".dotsG")
-    .selectAll("circle")
-    .on("mouseenter", function(d) {
-      d3.select(".tip")
-        .style("opacity", 1)
-        .attr("style", "left: "+scaleX(d[currentAxis])+"px; top: "+d3.select(this).attr("cy")+"px; opacity:1;")
-        .html(""+
-          "<img src='"+d.images[0].url+"'/>"+
-        "");
-    })
-    .on("mouseleave", function(d) {
-      d3.select(".tip").attr("style", "display:none;");
-    })
-    .data(data)
-    .attr("fill", function(d) { return "rgba(0, 0, 0, 0.5)"; })
-    .transition()
-    .duration(100)
-    .delay(function(d, i) { return config.animationTimeDelay*i; })
-    .attr("cx", function(d) { return scaleX(d[currentAxis]); })
-    .attr("cy", function(d, i) { return Math.random()*(config.chartFrame.height) + config.chartFrame.t; })
-    .attr("r", function(d) { return d.highest_rating/20; })
-    .attr("fill", function(d) { return "rgba("+d.colors[0].r+","+d.colors[0].g+","+ d.colors[0].b+", 0.9)"; });
-
-    var axisX = d3.svg.axis()
-      .orient("bottom")
-      .scale(scaleX);
-    d3.select(".axisX")
-      .transition()
-      .duration(config.animationTime)
-      .call(axisX);
-
-}
