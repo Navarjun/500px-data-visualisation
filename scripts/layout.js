@@ -30,7 +30,7 @@ var url = baseURL + "&rpp=1000&only=Landscapes&image_size=1,4&feature=fresh_yest
 function getData(page, maxPage) {
   url += "&page="+page;
   d3.json(url, function(error, json){
-    console.log(page);
+    // console.log(page);
     var photos = json.photos.filter(function(d) { return d.taken_at }).map(function(d) {
       var year = +d.taken_at.slice(0, 4);
       var month = +d.taken_at.slice(5, 7) - 1;
@@ -57,8 +57,6 @@ function drawCharts() {
 
     var scaleX = d3.scale.linear().domain(d3.extent(d3.range(0, 24))).range([0, config.chartFrame.width])
 
-    console.log(scaleX.domain());
-
     var axis = d3.svg.axis()
       .ticks(24)
       .tickSize(-config.chartFrame.height, 0, 0)
@@ -67,11 +65,9 @@ function drawCharts() {
     chartG.append("g")
       .attr("transform", "translate("+config.chartFrame.x+","+config.chartFrame.height+")")
       .call(axis);
-    console.log(masterData.map(function(d) { return d.taken_at.getHours(); }));
     var nestingFunction = d3.nest().key(function(d) { return d.taken_at.getHours(); });
 
     var plotData = nestingFunction.entries(masterData)
-    console.log(plotData);
     chartG.append("g")
       .attr("transform", "translate("+config.chartFrame.x+",0)")
       .selectAll("g")
